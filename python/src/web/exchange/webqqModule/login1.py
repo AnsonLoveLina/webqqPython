@@ -1,18 +1,44 @@
 __author__ = 'zhouyi1'
-import urllib2,urllib,qqUser,subprocess,os,PyV8
+import urllib2,urllib,qqUser,subprocess,os,PyV8,sys
 from encryption import QQmd5
+class v8Doc(PyV8.JSClass):
+     def write(self, s):
+         print s.decode('utf-8')
+     def getElementById(self,s):
+        return s
+
+class Global(PyV8.JSClass):
+     def __init__(self):
+         self.document = v8Doc()
+         self.g_appid = 501004106
+
+glob = Global()
+
+
 def login():
+    #encode begin process code error
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+    #encode end
     url = 'https://ssl.ptlogin2.qq.com/login'
     # print urllib.urlencode({'verifycode':r'!SDF'})
     # print urllib.urlencode({'verifycode':qqUser.authCode1})
     md5Pwd = str(QQmd5().md5_2(qqUser.pwd, qqUser.authCode1, qqUser.authCode2))
-    encryptionJs = open('../../../../../js/Encryption.js')
+    encryptionJs = open('../../../../../js/mq_comm.js')
     encryptionJsCode = encryptionJs.read()
-    ctxt = PyV8.JSContext()
+    ctxt = PyV8.JSContext(glob)
     ctxt.enter()
     encryptionJsFun = ctxt.eval(encryptionJsCode)
-    smartPwd = encryptionJsFun.getEncryption(md5Pwd,qqUser.authCode2,qqUser.authCode1,1)
-    print 'pwd:',smartPwd
+    # pwd_salt = encryptionJsFun.md5(qqUser.pwd);
+    # print 'pwd_salt:',pwd_salt
+    # print 'authCode1:',qqUser.authCode1
+    # smartPwd = encryptionJsFun.getEncryption(pwd_salt,qqUser.authCode2,qqUser.authCode1,1)
+    print 'pwd:',qqUser.pwd
+    print 'authCode2:',qqUser.authCode2
+    print 'authCode1:',qqUser.authCode1
+    smartPwd = encryptionJsFun.getEncryption(qqUser.pwd,qqUser.authCode2,qqUser.authCode1,1)
+    print 'smartPwd:',smartPwd
+    print 'pt_verifysession_v1:',qqUser.pt_verifysession_v1
     # perPwd = os.popen('perl ')
     datas = {'u':qqUser.qq,
              'p':smartPwd,
@@ -30,13 +56,13 @@ def login():
              'pttype':1,
              'dumy':'',
              'fp':'loginerroralert',
-             'action':'0-20-40920',
+             'action':'0-15-9632',
              'mibao_css':'m_webqq',
-             't':2,
+             't':1,
              'g':1,
              'js_type':0,
              'js_ver':10113,
-             'login_sig':r'r0fGXXLaa*r2ugEV8seve8hSVzhtHXCwQSuAvKBd3nnmvURNOwA6szgUQzhF-*28',
+             'login_sig':'',
              'pt_randsalt':0,
              'pt_vcode_v1':0,
              # 'pt_uistyle':'5',

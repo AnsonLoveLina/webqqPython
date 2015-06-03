@@ -18,10 +18,11 @@ def coreGetCode():
         urllib2.install_opener(opener)
         response = urllib2.urlopen(url)
         for cookie in enumerate(cj):
-            pattern = re.compile('(\S*)verifysession=(\S*)\s(\S*)')
-            if pattern.match(cookie):
-                qqUser.authCode3 = pattern.groups[2]
-                qqUser.pt_verifysession_v1 = pattern.groups[2]
+            print cookie
+            # pattern = re.compile('(\S*)verifysession=(\S*)\s(\S*)')
+            # if pattern.match(cookie):
+            #     qqUser.authCode3 = pattern.groups[2]
+            #     qqUser.pt_verifysession_v1 = pattern.groups[2]
         fl = open('./authCodeImg/authCodeImage.jpg','wb')
         while 1:
             c = response.read()

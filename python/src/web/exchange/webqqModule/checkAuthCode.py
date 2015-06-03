@@ -20,8 +20,14 @@ def checkIn():
         # response = urllib2.urlopen(url)
         # for index,cookie in enumerate(cj):
         #         print '[',index,']',cookie
-        req = urllib2.Request(url)
-        response = urllib2.urlopen(req)
+        # req = urllib2.Request(url)
+        # response = urllib2.urlopen(req)
+
+        cj = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+        urllib2.install_opener(opener)
+        response = urllib2.urlopen(url)
+
         html = response.read()
         # print html
         autchCode = re.search("'(.+)','(.+)','(.+)','(.*)','(.+)'", html)
