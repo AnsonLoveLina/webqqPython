@@ -1,5 +1,6 @@
 __author__ = 'zhouyi1'
-import checkAuthCode,getAuthCode,login1,urllib
+import checkAuthCode,getAuthCode,login1,urllib,loginSigGet
+loginSigGet.coreGetLoginSig()
 checkAuthCode.checkIn()
 getAuthCode.coreGetCode()
 login1.login()

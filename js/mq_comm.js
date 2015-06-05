@@ -1526,7 +1526,7 @@ $.Encryption = function () {
         var saltPwd = TEA.enAsBase64(rsaH1Len + rsaH1 + TEA.strToBytes(salt) + vcodeLen + hexVcode);
         TEA.initkey("");
         //setTimeout(function () {
-        //    __monitor(488358, 1)
+            __monitor(488358, 1)
         //}, 0);
         return saltPwd.replace(/[\/\+=]/g, function (a) {
             return {"/": "-", "+": "*", "=": "_"}[a]

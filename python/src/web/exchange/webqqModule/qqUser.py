@@ -1,6 +1,7 @@
 __author__ = 'zhouyi1'
 qq = '2236678453'
 pwd = 'xx198742@'
+daid = '164'
 appid = '501004106'
 js_ver = '10113'
 loginSig = r'fQ7Mq3WdteRUxPsYHfBLrJSyop-BFUpxtrumX0j*IgjgKFJ7TcpaCGHkQMM7LASk'

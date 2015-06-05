@@ -26,20 +26,16 @@ def login():
     md5Pwd = str(QQmd5().md5_2(qqUser.pwd, qqUser.authCode1, qqUser.authCode2))
     encryptionJs = open('../../../../../js/mq_comm.js')
     encryptionJsCode = encryptionJs.read()
+    #achieve document in js
     ctxt = PyV8.JSContext(glob)
     ctxt.enter()
     encryptionJsFun = ctxt.eval(encryptionJsCode)
     # pwd_salt = encryptionJsFun.md5(qqUser.pwd);
     # print 'pwd_salt:',pwd_salt
     # print 'authCode1:',qqUser.authCode1
-    # smartPwd = encryptionJsFun.getEncryption(pwd_salt,qqUser.authCode2,qqUser.authCode1,1)
-    print 'pwd:',qqUser.pwd
-    print 'authCode2:',qqUser.authCode2
-    print 'authCode1:',qqUser.authCode1
+    #smartPwd = encryptionJsFun.getEncryption(r'xx198742@',r'\x00\x00\x00\x00\x85\x51\x01\x35',r'!CMN',1)
     smartPwd = encryptionJsFun.getEncryption(qqUser.pwd,qqUser.authCode2,qqUser.authCode1,1)
     print 'smartPwd:',smartPwd
-    print 'pt_verifysession_v1:',qqUser.pt_verifysession_v1
-    # perPwd = os.popen('perl ')
     datas = {'u':qqUser.qq,
              'p':smartPwd,
              'verifycode':qqUser.authCode1,
@@ -62,14 +58,14 @@ def login():
              'g':1,
              'js_type':0,
              'js_ver':10113,
-             'login_sig':'',
+             'login_sig':qqUser.loginSig,
              'pt_randsalt':0,
              'pt_vcode_v1':0,
              # 'pt_uistyle':'5',
              'pt_verifysession_v1':qqUser.pt_verifysession_v1}
     params = urllib.urlencode(datas)
-    # print url + '?' + params
-    req = urllib2.Request(url+'?'+params)
+    print url + '?' + params
+    req = urllib2.Request(url=url+'?'+params,headers={'Content-Type' : 'text/xml'})
     req.add_header('Referer','https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=5&mibao_css=m_webqq&appid=%s&enable_qlogin=0&no_verifyimg=1&s_url=http%%3A%%2F%%2Fweb2.qq.com%%2Floginproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20140612002'%qqUser.appid)
     resp = urllib2.urlopen(req)
     print resp.read()
