@@ -1489,8 +1489,8 @@ $.Encryption = function () {
             arr.push("\\x" + str.substr(i, 2))
         }
         arr = arr.join("");
-        //eval("var temp = '" + arr + "'");
-		var temp = 'xx198742@'
+        eval("var temp = '" + arr + "'");
+		//var temp = 'xx198742@'
         return temp
     }
 

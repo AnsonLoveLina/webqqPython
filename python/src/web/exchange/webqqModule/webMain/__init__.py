@@ -90,7 +90,7 @@ class webqq:
             im.show()
             self.verifycode1 = raw_input("verifer:")
             for cookie in self.cookies:
-                if cookie.name == 'ptvfsession':
+                if cookie.name == 'verifysession':
                     self.pt_verifysession_v1 = self.cookies
         else:
             self.pt_verifysession_v1 = verifycode.group(4)
@@ -103,8 +103,10 @@ class webqq:
         #achieve document in js
         ctxt = PyV8.JSContext(Global())
         ctxt.enter()
-        encryptionJsFun = ctxt.eval(encryptionJsCode)
-        smartPwd = encryptionJsFun.getEncryption(self.pwd,binascii.b2a_hex(self.verifycode2),self.verifycode1,0)
+        jsCode = encryptionJsCode[:-90] + " function ss(){var p = '"+self.pwd+"';var salt = '"+self.verifycode1+"';var verifycode = '"+self.verifycode2+"';var r = $.Encryption.getEncryption(p,salt,verifycode,0);return (r);} " \
+                                                                                                                                                        "return {ss: ss,getEncryption: getEncryption, getRSAEncryption: getRSAEncryption, md5: md5}}();"
+        encryptionJsFun = ctxt.eval(jsCode)
+        smartPwd = encryptionJsFun.ss()
         return smartPwd
 
     def loginGet(self):
