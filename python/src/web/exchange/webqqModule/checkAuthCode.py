@@ -12,24 +12,15 @@ def checkIn():
         datas = urllib.urlencode(param)
         #using GOT request method
         url = 'https://ssl.ptlogin2.qq.com/check?'+datas
-        #print url
-        #req = urllib2.Request(url,datas)
-        # cj = cookielib.CookieJar()
-        # opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-        # urllib2.install_opener(opener)
-        # response = urllib2.urlopen(url)
-        # for index,cookie in enumerate(cj):
-        #         print '[',index,']',cookie
-        # req = urllib2.Request(url)
-        # response = urllib2.urlopen(req)
 
-        cj = cookielib.CookieJar()
+        cj = qqUser.cj
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
         urllib2.install_opener(opener)
         response = urllib2.urlopen(url)
+        qqUser.cj = cj
 
         html = response.read()
-        # print html
+        print html
         autchCode = re.search("'(.+)','(.+)','(.+)','(.*)','(.+)'", html)
         qqUser.checkAuthCode = autchCode.group(1)
         qqUser.authCode1 = autchCode.group(2)

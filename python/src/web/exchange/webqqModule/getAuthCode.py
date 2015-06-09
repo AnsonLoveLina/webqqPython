@@ -11,18 +11,13 @@ def coreGetCode():
                  'cap_cd': qqUser.cap_cd,
                  'r':random.random()}
         url = 'https://ssl.captcha.qq.com/getimage?' + urllib.urlencode(datas)
-        # req = urllib2.Request(url)
-        # response = urllib2.urlopen(req)
-        cj = cookielib.CookieJar()
+        cj = qqUser.cj
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
         urllib2.install_opener(opener)
         response = urllib2.urlopen(url)
+        qqUser.cj = cj
         for cookie in enumerate(cj):
             print cookie
-            # pattern = re.compile('(\S*)verifysession=(\S*)\s(\S*)')
-            # if pattern.match(cookie):
-            #     qqUser.authCode3 = pattern.groups[2]
-            #     qqUser.pt_verifysession_v1 = pattern.groups[2]
         fl = open('./authCodeImg/authCodeImage.jpg','wb')
         while 1:
             c = response.read()

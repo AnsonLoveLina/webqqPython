@@ -25,12 +25,7 @@ def coreGetLoginSig():
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
         urllib2.install_opener(opener)
         response = urllib2.urlopen(url)
+        qqUser.cj = cj
         for cookie in enumerate(cj):
             if cookie[1].name == 'pt_login_sig':
                 qqUser.loginSig = cookie[1].value
-                # print qqUser.loginSig
-            # pattern = re.compile('(\S*)verifysession=(\S*)\s(\S*)')
-            # if pattern.match(cookie):
-            #     qqUser.authCode3 = pattern.groups[2]
-            #     qqUser.pt_verifysession_v1 = pattern.groups[2]
-

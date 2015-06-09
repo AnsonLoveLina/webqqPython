@@ -34,11 +34,9 @@ def login():
     # print 'pwd_salt:',pwd_salt
     # print 'authCode1:',qqUser.authCode1
     #smartPwd = encryptionJsFun.getEncryption(r'xx198742@',r'\x00\x00\x00\x00\x85\x51\x01\x35',r'!CMN',1)
-    smartPwd = encryptionJsFun.getEncryption(qqUser.pwd,qqUser.authCode2,qqUser.authCode1,1)
+    smartPwd = encryptionJsFun.getEncryption(qqUser.pwd,qqUser.authCode2,qqUser.authCode1,0)
     print 'smartPwd:',smartPwd
     datas = {'u':qqUser.qq,
-             'p':smartPwd,
-             'verifycode':qqUser.authCode1,
              'webqq_type':10,
              'remember_uin':1,
              'login2qq':1,
@@ -64,8 +62,12 @@ def login():
              # 'pt_uistyle':'5',
              'pt_verifysession_v1':qqUser.pt_verifysession_v1}
     params = urllib.urlencode(datas)
-    print url + '?' + params
-    req = urllib2.Request(url=url+'?'+params,headers={'Content-Type' : 'text/xml'})
-    req.add_header('Referer','https://ui.ptlogin2.qq.com/cgi-bin/login?daid=164&target=self&style=5&mibao_css=m_webqq&appid=%s&enable_qlogin=0&no_verifyimg=1&s_url=http%%3A%%2F%%2Fweb2.qq.com%%2Floginproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20140612002'%qqUser.appid)
-    resp = urllib2.urlopen(req)
-    print resp.read()
+    print url + '?' + params + "&p=" + smartPwd + "&verifycode=" + qqUser.authCode1
+    cj = qqUser.cj
+    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    urllib2.install_opener(opener)
+    response = urllib2.urlopen(url + '?' + params + "&p=" + smartPwd + "&verifycode=" + qqUser.authCode1)
+    qqUser.cj = cj
+    for cookie in enumerate(cj):
+        print cookie
+    print response.read()

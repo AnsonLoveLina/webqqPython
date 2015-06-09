@@ -12,3 +12,4 @@ authCode2 = ''
 authCode3 = ''
 realAuthCode = ''
 pt_verifysession_v1 = ''
+cj = None
