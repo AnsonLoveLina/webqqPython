@@ -5,7 +5,6 @@ __author__ = 'zhouyi1'
 import urllib2
 import re
 import random
-from encryption import QQmd5
 import cookielib
 import getpass
 import time
@@ -45,9 +44,33 @@ class webqq:
         self.loginSig = r'fQ7Mq3WdteRUxPsYHfBLrJSyop-BFUpxtrumX0j*IgjgKFJ7TcpaCGHkQMM7LASk'
         self.cap_cd = r'LTXa5y7uicPpkG_XJp11SMZCIi5hijbx'
         self.mycookie = ";"
+        self.getloginSig()
         #self.clientid = "21485768"
         #self.clientid = "34592990"
         self.clientid = str(random.randint(10000000, 99999999))
+
+    def getloginSig(self):
+        datas = {'aid': self.daid,
+                 'target':'self',
+                 'style':'16',
+                 'mibao_css':'m_webqq',
+                 'appid':self.appid,
+                 'enable_qlogin':'0',
+                 'no_verifyimg': '1',
+                 's_url': 'http://w.qq.com/proxy.html',
+                 'f_url':'loginerroralert',
+                 'strong_login':'1',
+                 'login_state':'10',
+                 't':'20131024001'}
+        url = 'https://ui.ptlogin2.qq.com/cgi-bin/login?' + urllib.urlencode(datas)
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
+        req = urllib2.Request(url)
+        response = urllib2.urlopen(req)
+        for cookie in self.cookies:
+            if cookie.name == 'pt_login_sig':
+                self.loginSig = cookie.value;
+
 
     def getSafeCode(self):
         param = {'pt_tea':'1',
@@ -60,6 +83,8 @@ class webqq:
                 'r':random.random()}
         datas = urllib.urlencode(param)
         url = 'https://ssl.ptlogin2.qq.com/check?'+datas
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
         req = urllib2.Request(url)
         #self.mycookie += "confirmuin=" + self.user + ";"
         #req.add_header('Cookie', self.mycookie)
@@ -77,6 +102,8 @@ class webqq:
                      'cap_cd': self.cap_cd,
                      'r':random.random()}
             url = 'https://ssl.captcha.qq.com/getimage?' + urllib.urlencode(datas)
+            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+            urllib2.install_opener(opener)
             req = urllib2.Request(url)
             response = urllib2.urlopen(req)
             self.fi = open("./authCodeImg/authCodeImage.jpg", "wb")
@@ -91,20 +118,21 @@ class webqq:
             self.verifycode1 = raw_input("verifer:")
             for cookie in self.cookies:
                 if cookie.name == 'verifysession':
-                    self.pt_verifysession_v1 = self.cookies
+                    self.pt_verifysession_v1 = self.cookie.value
         else:
             self.pt_verifysession_v1 = verifycode.group(4)
         print self.check, self.verifycode1, self.verifycode2
 
     def getPwd(self):
-        md5Pwd = str(QQmd5().md5_2(self.pwd, self.verifycode1, binascii.b2a_hex(self.verifycode2)))
+        # md5Pwd = str(QQmd5().md5_2(self.pwd, self.verifycode1, binascii.b2a_hex(self.verifycode2)))
         encryptionJs = open('mq_comm.js')
         encryptionJsCode = encryptionJs.read()
         #achieve document in js
         ctxt = PyV8.JSContext(Global())
         ctxt.enter()
-        jsCode = encryptionJsCode[:-90] + " function ss(){var p = '"+self.pwd+"';var salt = '"+self.verifycode1+"';var verifycode = '"+self.verifycode2+"';var r = $.Encryption.getEncryption(p,salt,verifycode,0);return (r);} " \
-                                                                                                                                                        "return {ss: ss,getEncryption: getEncryption, getRSAEncryption: getRSAEncryption, md5: md5}}();"
+        jsCode = encryptionJsCode[:-90] + " function ss(){var p = '"+self.pwd+"';var salt = '"+self.verifycode2+"';var verifycode = '"+self.verifycode1+"';var r = getEncryption(p,salt,verifycode,1);return (r);} " \
+                                                                                                                                                            "return {ss: ss,getEncryption: getEncryption, getRSAEncryption: getRSAEncryption, md5: md5}}();"
+        # print jsCode
         encryptionJsFun = ctxt.eval(jsCode)
         smartPwd = encryptionJsFun.ss()
         return smartPwd
@@ -112,13 +140,12 @@ class webqq:
     def loginGet(self):
         #cs = ['%s=%s' %  (c.name, c.value) for c in self.cookies]
         #self.mycookie += ";" "; ".join(cs)
-        smartPwd = str(self.getPwd())
+        smartPwd = self.getPwd()
 
         print smartPwd
 
+        print self.loginSig
         datas = {'u':self.user,
-                 'p':smartPwd,
-                 'verifycode':self.verifycode1,
                  'webqq_type':10,
                  'remember_uin':1,
                  'login2qq':1,
@@ -138,14 +165,16 @@ class webqq:
                  'g':1,
                  'js_type':0,
                  'js_ver':10113,
-                 'login_sig':'',
+                 'login_sig':self.loginSig,
                  'pt_randsalt':0,
                  'pt_vcode_v1':0,
                  # 'pt_uistyle':'5',
                  'pt_verifysession_v1':self.pt_verifysession_v1}
 
         params = urllib.urlencode(datas)
-        login_url = 'https://ssl.ptlogin2.qq.com/login' + '?' + params
+        login_url = 'https://ssl.ptlogin2.qq.com/login' + '?' + params + "&p=" + smartPwd + "&verifycode=" + self.verifycode1
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
         req = urllib2.Request(login_url)
         req.add_header("Referer", "https://ui.ptlogin2.qq.com/cgi-bin/login?daid="+self.daid+"&target=self&style=16&mibao_css=m_webqq&appid="+self.appid+"&enable_qlogin=0&no_verifyimg=1&s_url=http%3A%2F%2Fw.qq.com%2Fproxy.html&f_url=loginerroralert&strong_login=1&login_state=10&t=20131024001")
 
