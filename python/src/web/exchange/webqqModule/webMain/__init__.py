@@ -69,7 +69,7 @@ class webqq:
         response = urllib2.urlopen(req)
         for cookie in self.cookies:
             if cookie.name == 'pt_login_sig':
-                self.loginSig = cookie.value;
+                self.loginSig = cookie.value
 
 
     def getSafeCode(self):
@@ -118,7 +118,7 @@ class webqq:
             self.verifycode1 = raw_input("verifer:")
             for cookie in self.cookies:
                 if cookie.name == 'verifysession':
-                    self.pt_verifysession_v1 = self.cookie.value
+                    self.pt_verifysession_v1 = cookie.value
         else:
             self.pt_verifysession_v1 = verifycode.group(4)
         print self.check, self.verifycode1, self.verifycode2
@@ -130,8 +130,10 @@ class webqq:
         #achieve document in js
         ctxt = PyV8.JSContext(Global())
         ctxt.enter()
-        jsCode = encryptionJsCode[:-90] + " function ss(){var p = '"+self.pwd+"';var salt = '"+self.verifycode2+"';var verifycode = '"+self.verifycode1+"';var r = getEncryption(p,salt,verifycode,1);return (r);} " \
-                                                                                                                                                            "return {ss: ss,getEncryption: getEncryption, getRSAEncryption: getRSAEncryption, md5: md5}}();"
+        jsCode = encryptionJsCode
+        jsCode = jsCode[:-90] + "function ss(){var p='"+self.pwd+"';var verifycode1='"+self.verifycode1+"';var verifycode2='"+self.verifycode2+"';" \
+        "return getEncryption(p,verifycode2,verifycode1,0)}" \
+        "return {ss:ss,getEncryption: getEncryption, getRSAEncryption: getRSAEncryption, md5: md5}}();"
         # print jsCode
         encryptionJsFun = ctxt.eval(jsCode)
         smartPwd = encryptionJsFun.ss()
@@ -142,9 +144,9 @@ class webqq:
         #self.mycookie += ";" "; ".join(cs)
         smartPwd = self.getPwd()
 
-        print smartPwd
+        print "smartPwd:",smartPwd
 
-        print self.loginSig
+        print "loginSig:",self.loginSig
         datas = {'u':self.user,
                  'webqq_type':10,
                  'remember_uin':1,
@@ -182,12 +184,15 @@ class webqq:
         #self.opener.addheaders.append(("Cookie", self.mycookie))
         resp = urllib2.urlopen(req)
         print resp.read()
-        for cookie in self.cookies:
-            print cookie
+        # for cookie in self.cookies:
+            # print cookie
         #
         # print urllib2.urlopen('http://web2.qq.com/web2/get_msg_tip?uin=&tp=1&id=0&retype=1&rc=0&lv=3&t=1358252543124').read()
         # #cs = ['%s=%s' %  (c.name, c.value) for c in self.cookies]
         # #self.mycookie += ";" "; ".join(cs)
+
+    # def loginPost(self):
+    #     nil
 
 
 
@@ -197,7 +202,7 @@ def main():
     qq = webqq(user, pwd)
     qq.getSafeCode()
     qq.loginGet()
-    # qq.loginPost()
+    qq.loginPost()
     # qq.getGroupList()
     # qq.getFriend()
 
