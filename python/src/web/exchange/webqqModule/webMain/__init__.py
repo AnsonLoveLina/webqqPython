@@ -124,7 +124,7 @@ class webqq:
         print self.check, self.verifycode1, self.verifycode2
 
     def getPwd(self):
-        # md5Pwd = str(QQmd5().md5_2(self.pwd, self.verifycode1, binascii.b2a_hex(self.verifycode2)))
+        # md5Pwd = str(QQmd5().md5_2(self.pwd, self.verifycode1, self.verifycode2))
         encryptionJs = open('mq_comm.js')
         encryptionJsCode = encryptionJs.read()
         #achieve document in js
@@ -139,7 +139,7 @@ class webqq:
         smartPwd = encryptionJsFun.ss()
         return smartPwd
 
-    def loginGet(self):
+    def login1(self):
         #cs = ['%s=%s' %  (c.name, c.value) for c in self.cookies]
         #self.mycookie += ";" "; ".join(cs)
         smartPwd = self.getPwd()
@@ -183,26 +183,48 @@ class webqq:
         #req.add_header("Cookie", self.mycookie)
         #self.opener.addheaders.append(("Cookie", self.mycookie))
         resp = urllib2.urlopen(req)
-        print resp.read()
-        # for cookie in self.cookies:
+        login1Html = resp.read()
+        print login1Html
+        login2UrlGroup = re.search("'(.+)','(.+)','(.+)','(.*)','(.+)'",login1Html)
+        self.login2Url = login2UrlGroup.group(4)
+        for cookie in self.cookies:
             # print cookie
-        #
-        # print urllib2.urlopen('http://web2.qq.com/web2/get_msg_tip?uin=&tp=1&id=0&retype=1&rc=0&lv=3&t=1358252543124').read()
-        # #cs = ['%s=%s' %  (c.name, c.value) for c in self.cookies]
-        # #self.mycookie += ";" "; ".join(cs)
+            if cookie.name == 'ptwebqq':
+                self.ptwebqq = cookie.value
+            elif cookie.name == 'clientid':
+                self.clientid = cookie.value
 
-    # def loginPost(self):
-    #     nil
+    def login2(self):
+        self.loginSigCheck()
+        # print 'ptwebqq:',self.ptwebqq
+        # print 'clientid:',self.clientid
+        values = {
+            'ptwebqq':self.ptwebqq,
+            'clientid':self.clientid,
+            'psessionid':'',
+            'status':'online'
+        }
+        url = 'http://d.web2.qq.com/channel/login2'
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
+        datas = urllib.urlencode(values)
+        req = urllib2.Request(url,datas)
+        resp = urllib2.urlopen(req)
+        print resp.read()
 
 
+    def loginSigCheck(self):
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
+        req = urllib2.Request(self.login2Url)
 
 def main():
     user = '2236678453'
     pwd = 'xx198742@'
     qq = webqq(user, pwd)
     qq.getSafeCode()
-    qq.loginGet()
-    qq.loginPost()
+    qq.login1()
+    qq.login2()
     # qq.getGroupList()
     # qq.getFriend()
 
