@@ -144,10 +144,12 @@ class webqq:
         #self.mycookie += ";" "; ".join(cs)
         smartPwd = self.getPwd()
 
-        print "smartPwd:",smartPwd
+        # print "smartPwd:",smartPwd
 
-        print "loginSig:",self.loginSig
+        # print "loginSig:",self.loginSig
         datas = {'u':self.user,
+                 'p':smartPwd,
+                 'verifycode':self.verifycode1,
                  'webqq_type':10,
                  'remember_uin':1,
                  'login2qq':1,
@@ -174,7 +176,7 @@ class webqq:
                  'pt_verifysession_v1':self.pt_verifysession_v1}
 
         params = urllib.urlencode(datas)
-        login_url = 'https://ssl.ptlogin2.qq.com/login' + '?' + params + "&p=" + smartPwd + "&verifycode=" + self.verifycode1
+        login_url = 'https://ssl.ptlogin2.qq.com/login' + '?' + params
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
         req = urllib2.Request(login_url)
@@ -204,19 +206,28 @@ class webqq:
             'psessionid':'',
             'status':'online'
         }
+        realValues = {
+            'r':str(values)
+        }
         url = 'http://d.web2.qq.com/channel/login2'
+        headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
-        datas = urllib.urlencode(values)
+        datas = urllib.urlencode(realValues)
+        # print datas
         req = urllib2.Request(url,datas)
+        req.add_header("Referer", headerUrl)
+        req.add_header("Content-Type", 'application/x-www-form-urlencoded')
         resp = urllib2.urlopen(req)
         print resp.read()
 
 
     def loginSigCheck(self):
+        print self.login2Url
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
         req = urllib2.Request(self.login2Url)
+        urllib2.urlopen(req)
 
 def main():
     user = '2236678453'
