@@ -1,8 +1,12 @@
 __author__ = 'zhouyi1'
+a="123123"
 values = {
-            'ptwebqq':'1',
-            'clientid':'2',
-            'psessionid':'',
-            'status':'online'
+            "ptwebqq":a,
+            "clientid":int("123213"),
+            "psessionid":"",
+            "status":"online"
 }
-print str(values)
+realValues = {
+        'r':str(values)
+}
+print realValues

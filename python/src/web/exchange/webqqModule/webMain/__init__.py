@@ -13,6 +13,7 @@ from encryption import QQmd5
 from PIL import Image
 import PyV8
 import binascii
+import util
 
 import urllib
 
@@ -125,7 +126,7 @@ class webqq:
         # print self.check, self.verifycode1, self.verifycode2
 
     def getPwd(self):
-        self.md5Pwd = str(QQmd5().md5_2(self.pwd, self.verifycode1, self.verifycode2))
+        # self.md5Pwd = str(QQmd5().md5_2(self.pwd, self.verifycode1, self.verifycode2))
         encryptionJs = open('mq_comm.js')
         encryptionJsCode = encryptionJs.read()
         #achieve document in js
@@ -244,12 +245,11 @@ class webqq:
         headerUrl = 'http://s.web2.qq.com/proxy.html?v=20130916001&callback=1&id=1'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
-        datas = 'r=%7B%22vfwebqq%22%3A%22'+self.vfwebqqResult['result']['vfwebqq']+'%22%2C%22hash%22%3A%22'+self.md5Pwd+'%22%7D'
+        datas = 'r=%7B%22vfwebqq%22%3A%22'+self.vfwebqqResult['result']['vfwebqq']+'%22%2C%22hash%22%3A%22'+util.hash(self.user,self.ptwebqq)+'%22%7D'
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
         print resp.read()
-
 
 
 def main():
