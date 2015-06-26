@@ -251,6 +251,16 @@ class webqq:
         resp = urllib2.urlopen(req)
         print resp.read()
 
+    def reciveMsg(self):
+        url = 'http://d.web2.qq.com/channel/poll2'
+        headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
+        datas = 'r:{"ptwebqq":"'+self.ptwebqq+'","clientid":'+self.clientid+',"psessionid":"'+self.login2Result['result']['psessionid']+'","key":""}'
+        req = urllib2.Request(url,datas)
+        req.add_header("Referer", headerUrl)
+        resp = urllib2.urlopen(req)
+
 
 def main():
     user = '2236678453'
@@ -260,6 +270,8 @@ def main():
     qq.login1()
     qq.login2()
     qq.getFriends()
+    # while(1):
+
 
 
 if __name__ == "__main__":

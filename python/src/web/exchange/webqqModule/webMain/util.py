@@ -34,16 +34,16 @@ def hashJs(q,ptwebqq):
 
 def hash(q,ptwebqq):
     q += ""
-    N = []
+    N = [0]*len(ptwebqq)
     for T in range(len(ptwebqq)):
         N[T%4] ^= ord(ptwebqq[T])
     U = ["EC","OK"]
-    V = []
-    V[0] = q>>24 & 255 ^ ord(U[0][0])
-    V[1] = q>>16 & 255 ^ ord(U[0][1])
-    V[2] = q>>8 & 255 ^ ord(U[1][0])
-    V[3] = q & 255 ^ ord(U[1][1])
-    U = []
+    V = [0 for i in range(4)]
+    V[0] = int(q)>>24 & 255 ^ ord(U[0][0])
+    V[1] = int(q)>>16 & 255 ^ ord(U[0][1])
+    V[2] = int(q)>>8 & 255 ^ ord(U[1][0])
+    V[3] = int(q) & 255 ^ ord(U[1][1])
+    U = [0 for i in range(8)]
     for T in range(8):
         U[T] = N[T>>1] if T%2==0 else V[T>>1]
     N = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
@@ -53,7 +53,6 @@ def hash(q,ptwebqq):
         V += N[U[T] & 15]
     return V
 
-print hash('2236678453','257b292601192c1948876a5d1be045f742a48de4cdd583ed92856cec7a9d946a')
 
 
 def hashOld(q,ptwebqq):
