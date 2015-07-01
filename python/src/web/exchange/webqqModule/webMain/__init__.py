@@ -249,6 +249,7 @@ class webqq:
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
+        # print resp.read()
         self.friends = json.load(resp)
 
     def reciveMsg(self):
@@ -260,7 +261,6 @@ class webqq:
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
-
 
 def main():
     user = '2236678453'
