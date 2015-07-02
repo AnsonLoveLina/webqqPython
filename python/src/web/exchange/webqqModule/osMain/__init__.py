@@ -32,23 +32,31 @@ config = ConfigParser.ConfigParser()
 path = os.path.split(os.path.realpath(__file__))[0] + '/cmdType.conf'
 config.read(path)
 
-datas = {}
+datas = None
 
 def initFriendsDic(jsonFriends):
+    global datas
     jsonLists = list()
     jsons = json.loads(jsonFriends)
     for i in range(len(jsons)):
         jsonLists.append(jsons[i]['uin'])
-    datas.fromkeys(jsonLists,-1)
+    datas = {}.fromkeys(jsonLists,subprocess.Popen("bash",bufsize=1,shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE))
 
 def coreWrite(cmd,p):
     if p!=None:
+        # p.wait()
         p.stdin.write(cmd.command+"\n")
-        while True:
+        # for line in iter(p.stdout.readline,""):
+        #     print 'begin'
+        #     print line.rstrip()
+
+        while p.poll() is None:
+            p.stdout.flush()
             buff = p.stdout.readline()
-            print buff
+            print "buff=="+buff
             # 如果当前经常还没退出，并且BUFF已经没东西了。那么就意味着指令的输出读完了
-            if buff == '' and p.poll() != None:
+            if buff == '':
+                print 'break'
                 break
 
 
@@ -62,10 +70,10 @@ def osHandle(cmd):
         p = subprocess.Popen("bash",shell=True,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     else:
         # 如果发送消息的不是好友那么不予处理
-        p = datas.get(cmd.uin,None)
+        p = datas.get(int(cmd.uin),None)
     coreWrite(cmd,p)
 
 initFriendsDic(r'[{"face":591,"flag":285737536,"nick":"灰灰","uin":4192527649},{"face":522,"flag":4719170,"nick":"阿毅","uin":551435889}]')
 
-osHandle(cmdEntity('dir','551435889'))
+osHandle(cmdEntity('pwd','551435889'))
 
