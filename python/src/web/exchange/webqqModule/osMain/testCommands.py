@@ -1,18 +1,27 @@
 __author__ = 'zy-xx'
-import commands,os
+import commands,os,select
 from subprocess import *
 
-p = Popen("bash",shell=True, bufsize = 0, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+handle = open(r'\tmp.log','wb+')
+
+p = Popen("bash",shell=True, bufsize = 0, stdin=PIPE, stdout=handle, stderr=PIPE)
+#
+# readable,writeable,exceptional = select.select(p.stdout,p.stdin,[])
+# print readable
+# print writeable
+# print exceptional
 
 p.stdin.write("pwd\n")
-print p.stdout.readline()
+p.stdin.flush()
+# handle.truncate()
+# print handle.read()
 p.stdin.write("cd /tmp\n")
+p.stdin.flush()
+# handle.truncate()
 p.stdin.write("pwd\n")
-# print p.stdout.readline()
-print p.stdout.readline()
+p.stdin.flush()
+# handle.truncate()
 
-status,output = commands.getstatusoutput("pwd")
-print status
-print output
-
-# print os.popen('ls').read()
+# status,output = commands.getstatusoutput("pwd")
+# print status
+# print output

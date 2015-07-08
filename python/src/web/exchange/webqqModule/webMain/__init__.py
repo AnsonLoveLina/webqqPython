@@ -261,6 +261,19 @@ class webqq:
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
+        print resp.read()
+        self.sendMsg(self,'','')
+
+    def sendMsg(self,uin,content):
+        url = 'http://d.web2.qq.com/channel/send_buddy_msg2'
+        headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
+        urllib2.install_opener(opener)
+        datas = 'r:{"to":'+uin+',"content":"'+content+'","face":534,"clientid":'+self.clientid+',"msg_id":68880001,"psessionid":"'+self.login2Result['result']['psessionid']+'"}'
+        req = urllib2.Request(url,datas)
+        req.add_header("Referer", headerUrl)
+        resp = urllib2.urlopen(req)
+
 
 def main():
     user = '2236678453'
@@ -270,7 +283,8 @@ def main():
     qq.login1()
     qq.login2()
     qq.getFriends()
-    # while(1):
+    while(1):
+        qq.reciveMsg()
 
 
 
