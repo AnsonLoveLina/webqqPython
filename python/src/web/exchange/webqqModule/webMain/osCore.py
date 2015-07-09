@@ -1,7 +1,7 @@
-#coding=utf-8
+#coding = utf-8
 __author__ = 'zhouyi1'
 
-import random,os,ConfigParser,subprocess,json,urllib
+import random,os,ConfigParser,subprocess,json
 
 class cmdEntity:
     def __init__(self,command,uin,type='shell',titleName='osCmdTitle'+str(random.uniform(10,20)),others=''):
@@ -62,13 +62,7 @@ def osHandle(cmd):
         p = datas.get(int(cmd.uin),None)
     coreWrite(cmd,p)
 
-# initFriendsDic(r'[{"face":591,"flag":285737536,"nick":"灰灰","uin":4192527649},{"face":522,"flag":4719170,"nick":"阿毅","uin":551435889}]')
+initFriendsDic(r'[{"face":591,"flag":285737536,"nick":"灰灰","uin":4192527649},{"face":522,"flag":4719170,"nick":"阿毅","uin":551435889}]')
 
-# osHandle(cmdEntity('dir','551435889'))
+osHandle(cmdEntity('dir','551435889'))
 
-# a = json.loads('{"retcode":0,"result":[{"poll_type":"message","value":{"msg_id":9988,"from_uin":3439173636,"to_uin":2236678453,"msg_id2":641242,"msg_type":9,"reply_ip":176757009,"time":1436410616,"content":[["font",{"size":12,"color":"000000","style":[0,0,0],"name":"\u5B8B\u4F53"}],"ss "]}}]}')
-# print type(a['result'][0]['value'])
-uin = 1
-print '{"to":'+uin+',"content":"'+content+'","face":534,"clientid":'+self.clientid+',"msg_id":68880001,"psessionid":"'+self.login2Result['result']['psessionid']+'"}'
-
-# print urllib.urlencode({'r':'{"ptwebqq"}'})

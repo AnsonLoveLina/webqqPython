@@ -6,6 +6,7 @@ import urllib2
 import re
 import random
 import cookielib
+import types
 import getpass
 import time
 import json
@@ -257,22 +258,36 @@ class webqq:
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
-        datas = 'r:{"ptwebqq":"'+self.ptwebqq+'","clientid":'+self.clientid+',"psessionid":"'+self.login2Result['result']['psessionid']+'","key":""}'
+        datas = {'r':'{"ptwebqq":"'+self.ptwebqq+'","clientid":'+self.clientid+',"psessionid":"'+self.login2Result['result']['psessionid']+'","key":""}'}
+        datas = urllib.urlencode(datas)
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
-        print resp.read()
-        self.sendMsg(self,'','')
+        # print resp.read()
+        self.rMsg = json.load(resp)
+        if 'retcode' in self.rMsg.keys() and self.rMsg['retcode']==0:
+            print 'already get the cmd,send it now!'
+            self.sendMsg(self.getDictValue(self.rMsg['result'][0]['value'],'from_uin'),'good cmd!')
+
+    def getDictValue(self,jsonObj,key,default=None):
+        if type(jsonObj) is not types.DictType:
+            return default
+        if key in jsonObj.keys():
+            return jsonObj[key]
+        else:
+            return default
 
     def sendMsg(self,uin,content):
         url = 'http://d.web2.qq.com/channel/send_buddy_msg2'
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
-        datas = 'r:{"to":'+uin+',"content":"'+content+'","face":534,"clientid":'+self.clientid+',"msg_id":68880001,"psessionid":"'+self.login2Result['result']['psessionid']+'"}'
+        datas = {'r':'{"to":'+str(uin)+',"content":"'+str(content)+'","face":534,"clientid":'+str(self.clientid)+',"msg_id":68880001,"psessionid":"'+str(self.login2Result['result']['psessionid'])+'"}'}
+        datas = urllib.urlencode(datas)
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
+        print 'send over!'
 
 
 def main():
@@ -282,9 +297,11 @@ def main():
     qq.getSafeCode()
     qq.login1()
     qq.login2()
+    print 'login success!'
     qq.getFriends()
     while(1):
         qq.reciveMsg()
+        time.sleep(5)
 
 
 
