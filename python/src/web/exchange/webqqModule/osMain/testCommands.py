@@ -1,3 +1,5 @@
+#coding=utf-8
+
 __author__ = 'zy-xx'
 import commands,os,select
 from subprocess import *
@@ -25,3 +27,8 @@ p.stdin.flush()
 # status,output = commands.getstatusoutput("pwd")
 # print status
 # print output
+
+def getDefaultContextStyle(context):
+   return r'[\"'+context+r'\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]'
+
+print '"'+getDefaultContextStyle('aaa!')
