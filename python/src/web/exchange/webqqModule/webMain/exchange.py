@@ -4,6 +4,8 @@ import Queue
 import threading,random
 from osCore import cmdEntity
 
+#目前打算用事件驱动模型处理
+
 # 之后将换成PriorityQueue优先级队列，保证一些人的命令是比较先处理，但是由于目前没想好优先的规则，暂时就不弄了
 queue = Queue.Queue()
 
@@ -23,10 +25,10 @@ class cmdHandler(threading.Thread):
         self.cmdQueue = queue
 
     def run(self):
-        if not self.cmdQueue.empty():
-            # 如果拿不到那么就不要死等了。异常吧
-            cmd = self.cmdQueue.get(False)
-            cmdEntity.osHandle(cmd)
+        # if not self.cmdQueue.empty():
+            # 如果拿不到那么就阻塞着
+            cmd = self.cmdQueue.get(True)
+            print 'execting s%',cmd
 
 def main():
     p = cmdProducer(cmdEntity('dir'),queue)
