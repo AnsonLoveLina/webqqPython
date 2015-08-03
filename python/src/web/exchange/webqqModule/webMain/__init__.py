@@ -18,6 +18,8 @@ import util
 
 import urllib
 
+import logging,os
+
 
 
 class v8Doc(PyV8.JSClass):
@@ -189,7 +191,7 @@ class webqq:
         #self.opener.addheaders.append(("Cookie", self.mycookie))
         resp = urllib2.urlopen(req)
         login1Html = resp.read()
-        print login1Html
+        logging.debug('the login1Return is:'+login1Html)
         login2UrlGroup = re.search("'(.+)','(.+)','(.+)','(.*)','(.+)'",login1Html)
         self.login2Url = login2UrlGroup.group(3)
         for cookie in self.cookies:
@@ -260,14 +262,16 @@ class webqq:
         urllib2.install_opener(opener)
         datas = {'r':'{"ptwebqq":"'+self.ptwebqq+'","clientid":'+self.clientid+',"psessionid":"'+self.login2Result['result']['psessionid']+'","key":""}'}
         datas = urllib.urlencode(datas)
+        # print datas
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
         # print resp.read()
+        # {"retcode":0,"result":[{"poll_type":"message","value":{"msg_id":10314,"from_uin":1062072065,"to_uin":2236678453,"msg_id2":885842,"msg_type":9,"reply_ip":176884841,"time":1438247844,"content":[["font",{"size":12,"color":"000000","style":[0,0,0],"name":"\u5B8B\u4F53"}],"sss "]}}]}
         self.rMsg = json.load(resp)
         if 'retcode' in self.rMsg.keys() and self.rMsg['retcode']==0:
             print 'already get the cmd,send it now!'
-            self.sendMsg(self.getDictValue(self.rMsg['result'][0]['value'],'from_uin'),'good cmd!')
+            self.sendMsg(self.getDictValue(self.rMsg['result'][0]['value'],'from_uin'),self.getDefaultContent('good cmd!'))
 
     def getDictValue(self,jsonObj,key,default=None):
         if type(jsonObj) is not types.DictType:
@@ -277,7 +281,17 @@ class webqq:
         else:
             return default
 
+    def getDefaultContent(self,content):
+        format = r"[\"%s\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]"
+        return format % (content,)
+
+    # content's format
+    # "[\"ccc\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]"
     def sendMsg(self,uin,content):
+        logging.debug(uin)
+        logging.debug(content)
+        if uin == None:
+            return
         url = 'http://d.web2.qq.com/channel/send_buddy_msg2'
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
@@ -287,7 +301,7 @@ class webqq:
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
-        print 'send over!'
+        logging.debug('send over!')
 
 
 def main():
@@ -297,7 +311,7 @@ def main():
     qq.getSafeCode()
     qq.login1()
     qq.login2()
-    print 'login success!'
+    logging.debug('login success!')
     qq.getFriends()
     while(1):
         qq.reciveMsg()
@@ -306,4 +320,5 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename = os.path.join(os.getcwd(), 'log.txt'), level = logging.DEBUG)
     main()
