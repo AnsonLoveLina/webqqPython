@@ -267,7 +267,7 @@ class webqq:
         self.rMsg = json.load(resp)
         if 'retcode' in self.rMsg.keys() and self.rMsg['retcode']==0:
             print 'already get the cmd,send it now!'
-            self.sendMsg(self.getDictValue(self.rMsg['result'][0]['value'],'from_uin'),self.getDefaultContextStyle('good cmd!'))
+            self.sendMsg(self.getDictValue(self.rMsg['result'][0]['value'],'from_uin'),'good cmd!')
 
     def getDictValue(self,jsonObj,key,default=None):
         if type(jsonObj) is not types.DictType:
@@ -277,24 +277,17 @@ class webqq:
         else:
             return default
 
-    def getDefaultContextStyle(self,context):
-        return r'[\"'+context+r'\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]'
-
     def sendMsg(self,uin,content):
         url = 'http://d.web2.qq.com/channel/send_buddy_msg2'
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
-        datas = {'r':'{"to":'+str(uin)+',"content":"'+content+'","face":534,"clientid":'+str(self.clientid)+',"msg_id":68880001,"psessionid":"'+str(self.login2Result['result']['psessionid'])+'"}'}
-        print datas
+        datas = {'r':'{"to":'+str(uin)+',"content":"'+str(content)+'","face":534,"clientid":'+str(self.clientid)+',"msg_id":68880001,"psessionid":"'+str(self.login2Result['result']['psessionid'])+'"}'}
         datas = urllib.urlencode(datas)
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
-        respJson = json.load(resp)
-        if respJson['result'] == 'ok' and respJson['retcode']==0:
-            print 'send success!'
-        print 'send it over!'
+        print 'send over!'
 
 
 def main():
