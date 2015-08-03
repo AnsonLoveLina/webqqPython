@@ -16,8 +16,18 @@ import PyV8
 import binascii
 import util
 
+import socket,Queue
+
+import thread
+
 import urllib
 
+
+import sys
+from twisted.internet.protocol import ServerFactory
+from twisted.protocols.basic import LineReceiver
+from twisted.python import log
+from twisted.internet import reactor
 
 
 class v8Doc(PyV8.JSClass):
@@ -31,7 +41,7 @@ class Global(PyV8.JSClass):
         self.document = v8Doc()
         self.g_appid = 501004106
 class webqq:
-    def __init__(self, user, pwd):
+    def __init__(self, user, pwd,queue):
         self.cookies = cookielib.CookieJar()
         self.opener = urllib2.build_opener(
                 urllib2.HTTPHandler(),
@@ -39,6 +49,7 @@ class webqq:
                 urllib2.HTTPCookieProcessor(self.cookies),
                 )
         urllib2.install_opener(self.opener)
+        self.queue = queue
         self.user = user
         self.pwd = pwd
         self.appid = "501004106"
@@ -267,7 +278,10 @@ class webqq:
         self.rMsg = json.load(resp)
         if 'retcode' in self.rMsg.keys() and self.rMsg['retcode']==0:
             print 'already get the cmd,send it now!'
-            self.sendMsg(self.getDictValue(self.rMsg['result'][0]['value'],'from_uin'),'good cmd!')
+            content = self.getDictValue(self.rMsg['result'][0]['value'],'content')[1]
+            from_uin = self.getDictValue(self.rMsg['result'][0]['value'],'from_uin')
+            queue.put({"from_uin":from_uin,"content":content})
+            # self.sendMsg(from_uin,self.getDefaultContentStyle(content+' is a good cmd!'))
 
     def getDictValue(self,jsonObj,key,default=None):
         if type(jsonObj) is not types.DictType:
@@ -277,23 +291,85 @@ class webqq:
         else:
             return default
 
+    def getDefaultContentStyle(self,content):
+        print content
+        return r'[\"'+str(content)+r'\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]'
+
     def sendMsg(self,uin,content):
         url = 'http://d.web2.qq.com/channel/send_buddy_msg2'
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
-        datas = {'r':'{"to":'+str(uin)+',"content":"'+str(content)+'","face":534,"clientid":'+str(self.clientid)+',"msg_id":68880001,"psessionid":"'+str(self.login2Result['result']['psessionid'])+'"}'}
+        datas = {'r':'{"to":'+str(uin)+',"content":"'+content+'","face":534,"clientid":'+str(self.clientid)+',"msg_id":68880001,"psessionid":"'+str(self.login2Result['result']['psessionid'])+'"}'}
+        print datas
         datas = urllib.urlencode(datas)
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
-        print 'send over!'
+        respJson = json.load(resp)
+        if respJson['result'] == 'ok' and respJson['retcode']==0:
+            print 'send success!'
+        print 'send it over!'
+
+queue = Queue.Queue(maxsize=10)
+
+user = '2236678453'
+pwd = 'xx198742@'
+qq = webqq(user, pwd,queue)
+
+class CmdProtocol(LineReceiver):
+
+    delimiter = '\n'
+
+    def connectionMade(self):
+        if 'host' in self.transport.getPeer().__dict__.keys():
+            self.client_ip = self.transport.getPeer().host
+        else:
+            self.client_ip = self.transport.getPeer()[1]
+        log.msg("Client connection from %s" % self.client_ip)
+        if len(self.factory.clients) >= self.factory.clients_max:
+            log.msg("Too many connections. bye !")
+            self.client_ip = None
+            self.transport.loseConnection()
+        else:
+            self.factory.clients.append(self.client_ip)
+
+    def connectionLost(self, reason):
+        log.msg('Lost client connection.  Reason: %s' % reason)
+        if self.client_ip:
+            self.factory.clients.remove(self.client_ip)
+
+    def dataReceived(self, data):
+        log.msg('dataCmd received from %s : %s' % (self.client_ip, data))
+        processCmd(data)
+
+    def lineReceived(self, line):
+        log.msg('lineCmd received from %s : %s' % (self.client_ip, line))
+        processCmd(line)
+
+class MyFactory(ServerFactory):
+
+    protocol = CmdProtocol
+
+    def __init__(self, clients_max=10):
+        self.clients_max = clients_max
+        self.clients = []
+
+def processCmd(data):
+    global queue,qq
+    cmd = queue.get()
+    qq.sendMsg(cmd)
+
+def startLoop(qq):
+    log.startLogging(sys.stdout)
+    reactor.listenTCP(9999, MyFactory(2))
+    reactor.run()
 
 
 def main():
-    user = '2236678453'
-    pwd = 'xx198742@'
-    qq = webqq(user, pwd)
+    global queue,qq
+
+    thread.start_new_thread(startLoop,(qq))
     qq.getSafeCode()
     qq.login1()
     qq.login2()

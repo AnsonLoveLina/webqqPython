@@ -1,34 +1,31 @@
-#coding=utf-8
+# SimpleGUI program template
 
-__author__ = 'zy-xx'
-import commands,os,select
-from subprocess import *
+# Import the module
+import simplegui
 
-handle = open(r'\tmp.log','wb+')
+# Define global variables (program state)
+counter=0
 
-p = Popen("bash",shell=True, bufsize = 0, stdin=PIPE, stdout=handle, stderr=PIPE)
-#
-# readable,writeable,exceptional = select.select(p.stdout,p.stdin,[])
-# print readable
-# print writeable
-# print exceptional
+# Define "helper" functions
+def increment():
+    global counter
+    counter=counter+1
 
-p.stdin.write("pwd\n")
-p.stdin.flush()
-# handle.truncate()
-# print handle.read()
-p.stdin.write("cd /tmp\n")
-p.stdin.flush()
-# handle.truncate()
-p.stdin.write("pwd\n")
-p.stdin.flush()
-# handle.truncate()
+# Define event handler functions
+def tick():
+    increment()
+    print counter
+def buttionpress():
+    global counter
+    counter=0
 
-# status,output = commands.getstatusoutput("pwd")
-# print status
-# print output
+# Create a frame
+frame=simplegui.create_frame("SimpleGui Test", 100, 100)
 
-def getDefaultContextStyle(context):
-   return r'[\"'+context+r'\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]'
+# Register event handlers
+timer=simplegui.create_timer(1000,tick)
+frame.add_button("click me",buttionpress)
 
-print '"'+getDefaultContextStyle('aaa!')
+# Start frame and timers
+frame.start()
+timer.start()
