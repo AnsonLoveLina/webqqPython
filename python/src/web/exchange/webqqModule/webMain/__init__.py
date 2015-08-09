@@ -28,6 +28,7 @@ from twisted.internet.protocol import ServerFactory
 from twisted.protocols.basic import LineReceiver
 from twisted.python import log
 from twisted.internet import reactor
+from queueExec import *
 
 
 class v8Doc(PyV8.JSClass):
@@ -317,59 +318,17 @@ user = '2236678453'
 pwd = 'xx198742@'
 qq = webqq(user, pwd,queue)
 
-class CmdProtocol(LineReceiver):
 
-    delimiter = '\n'
-
-    def connectionMade(self):
-        if 'host' in self.transport.getPeer().__dict__.keys():
-            self.client_ip = self.transport.getPeer().host
-        else:
-            self.client_ip = self.transport.getPeer()[1]
-        log.msg("Client connection from %s" % self.client_ip)
-        if len(self.factory.clients) >= self.factory.clients_max:
-            log.msg("Too many connections. bye !")
-            self.client_ip = None
-            self.transport.loseConnection()
-        else:
-            self.factory.clients.append(self.client_ip)
-
-    def connectionLost(self, reason):
-        log.msg('Lost client connection.  Reason: %s' % reason)
-        if self.client_ip:
-            self.factory.clients.remove(self.client_ip)
-
-    def dataReceived(self, data):
-        log.msg('dataCmd received from %s : %s' % (self.client_ip, data))
-        processCmd(data)
-
-    def lineReceived(self, line):
-        log.msg('lineCmd received from %s : %s' % (self.client_ip, line))
-        processCmd(line)
-
-class MyFactory(ServerFactory):
-
-    protocol = CmdProtocol
-
-    def __init__(self, clients_max=10):
-        self.clients_max = clients_max
-        self.clients = []
-
-def processCmd(data):
-    global queue,qq
-    cmd = queue.get()
-    qq.sendMsg(cmd)
-
-def startLoop(qq):
+def startLoop(queue,qq):
     log.startLogging(sys.stdout)
-    reactor.listenTCP(9999, MyFactory(2))
+    reactor.callWhenRunning(QueueExec(queue,qq).execQueueJob)
     reactor.run()
 
 
 def main():
     global queue,qq
 
-    thread.start_new_thread(startLoop,(qq))
+    thread.start_new_thread(startLoop,(queue,qq))
     qq.getSafeCode()
     qq.login1()
     qq.login2()
@@ -383,3 +342,50 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+# 想了很多模式，还是决定自动LOOP公共QUEUE，暂时先放弃SOCKET链接驱动的模式
+# class CmdProtocol(LineReceiver):
+#
+#     delimiter = '\n'
+#
+#     def connectionMade(self):
+#         if 'host' in self.transport.getPeer().__dict__.keys():
+#             self.client_ip = self.transport.getPeer().host
+#         else:
+#             self.client_ip = self.transport.getPeer()[1]
+#         log.msg("Client connection from %s" % self.client_ip)
+#         if len(self.factory.clients) >= self.factory.clients_max:
+#             log.msg("Too many connections. bye !")
+#             self.client_ip = None
+#             self.transport.loseConnection()
+#         else:
+#             self.factory.clients.append(self.client_ip)
+#
+#     def connectionLost(self, reason):
+#         log.msg('Lost client connection.  Reason: %s' % reason)
+#         if self.client_ip:
+#             self.factory.clients.remove(self.client_ip)
+#
+#     def dataReceived(self, data):
+#         log.msg('dataCmd received from %s : %s' % (self.client_ip, data))
+#         processCmd(data)
+#
+#     def lineReceived(self, line):
+#         log.msg('lineCmd received from %s : %s' % (self.client_ip, line))
+#         processCmd(line)
+#
+# class MyFactory(ServerFactory):
+#
+#     protocol = CmdProtocol
+#
+#     def __init__(self, clients_max=10):
+#         self.clients_max = clients_max
+#         self.clients = []
+#
+# def processCmd(data):
+#     global queue,qq
+#     cmd = queue.get()
+#     qq.sendMsg(cmd)
