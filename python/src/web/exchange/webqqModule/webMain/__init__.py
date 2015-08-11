@@ -266,6 +266,7 @@ class webqq:
         self.friends = json.load(resp)
 
     def reciveMsg(self):
+        # print self.cookies
         url = 'http://d.web2.qq.com/channel/poll2'
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
@@ -302,7 +303,7 @@ class webqq:
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
         urllib2.install_opener(opener)
         datas = {'r':'{"to":'+str(uin)+',"content":"'+content+'","face":534,"clientid":'+str(self.clientid)+',"msg_id":68880001,"psessionid":"'+str(self.login2Result['result']['psessionid'])+'"}'}
-        print datas
+        # print datas
         datas = urllib.urlencode(datas)
         req = urllib2.Request(url,datas)
         req.add_header("Referer", headerUrl)
@@ -320,23 +321,20 @@ qq = webqq(user, pwd,queue)
 
 
 def startLoop(queue,qq):
-    log.startLogging(sys.stdout)
-    reactor.callWhenRunning(QueueExec(queue,qq).execQueueJob)
+    reactor.callWhenRunning(QueueExec(queue,qq,reactor).execQueueJob)
     reactor.run()
 
 
 def main():
+    log.startLogging(sys.stdout)
     global queue,qq
 
-    thread.start_new_thread(startLoop,(queue,qq))
     qq.getSafeCode()
     qq.login1()
     qq.login2()
     print 'login success!'
-    qq.getFriends()
-    while(1):
-        qq.reciveMsg()
-        time.sleep(5)
+
+    startLoop(queue,qq)
 
 
 
