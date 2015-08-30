@@ -278,8 +278,10 @@ class webqq:
         resp = urllib2.urlopen(req)
         # print resp.read()
         self.rMsg = json.load(resp)
-        if 'retcode' in self.rMsg.keys() and self.rMsg['retcode']==0:
+        # the poll_type maybe notify or else
+        if 'retcode' in self.rMsg.keys() and self.rMsg['retcode']==0 and self.rMsg['result'][0]['poll_type']=='message':
             print 'already get the cmd,send it now!'
+            print self.rMsg
             content = self.getDictValue(self.rMsg['result'][0]['value'],'content')[1]
             from_uin = self.getDictValue(self.rMsg['result'][0]['value'],'from_uin')
             queue.put({"from_uin":from_uin,"content":content})
@@ -298,6 +300,9 @@ class webqq:
         return r'[\"'+str(content)+r'\",[\"font\",{\"name\":\"宋体\",\"size\":10,\"style\":[0,0,0],\"color\":\"000000\"}]]'
 
     def sendMsg(self,uin,content):
+        # print 'uin:'+str(uin)
+        # print 'content:'+content
+        content = str(content)
         url = 'http://d.web2.qq.com/channel/send_buddy_msg2'
         headerUrl = 'http://d.web2.qq.com/proxy.html?v=20130916001&callback=1&id=2'
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.cookies))
@@ -309,9 +314,10 @@ class webqq:
         req.add_header("Referer", headerUrl)
         resp = urllib2.urlopen(req)
         respJson = json.load(resp)
+        # print respJson
         if respJson['result'] == 'ok' and respJson['retcode']==0:
             print 'send success!'
-        print 'send it over!'
+        # print 'send it over!'
 
 queue = Queue.Queue(maxsize=10)
 
