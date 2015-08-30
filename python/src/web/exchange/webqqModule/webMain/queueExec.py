@@ -7,7 +7,7 @@ class QueueExec(object):
         self.queue = queue
         self.qq = qq
         self.reactor = reactor
-        self.commondProcess = CommondProcess([])
+        self.commondProcess = CommondProcess([],self)
         self.breakCmd = {'kill':self.commondProcess.kill,'terminate':self.commondProcess.terminate}
         self.outDivisor = outDivisor
 
@@ -19,12 +19,7 @@ class QueueExec(object):
         while True:
             if self.queue.qsize()>0:
                 cmdAndUinDic = self.queue.get()
-                resultList = self.execCmd(cmdAndUinDic)
-                # avoid a large number of return
-                for result in resultList:
-                    self.qq.sendMsg(cmdAndUinDic['from_uin'],self.qq.getDefaultContentStyle(result))
-                # clear the past result
-                self.commondProcess.clearPast()
+                self.execCmd(cmdAndUinDic)
             else:
                 break
         self.reactor.callLater(1, self.execQueueJob)
@@ -35,15 +30,23 @@ class QueueExec(object):
         if str(cmdAndUinDic['content']) in self.breakCmd.keys():
             self.breakCmd[str(cmdAndUinDic['content'])]
         else:
-            thread.start_new(self.commondProcess.write,(cmdAndUinDic['content'],))
-        # the time.sleep is the bad code
-        time.sleep(5)
+            thread.start_new(self.commondProcess.write,(cmdAndUinDic['content'],cmdAndUinDic['from_uin']))
+
+    # callBack for commandsExtend.py
+    def execOutPut(self,from_uin):
+        # print 'execOutPut begin'
         sourceList = self.commondProcess.outPut()
+        # print sourceList
 
         # paging though the outDivisor
-        outPutList = []
+        resultList = []
         begin = 0
         while not len(sourceList) < begin:
-            outPutList.append(sourceList[begin:begin+self.outDivisor])
+            resultList.append(sourceList[begin:begin+self.outDivisor])
             begin += self.outDivisor
-        return outPutList
+
+        # avoid a large number of return
+        for result in resultList:
+            self.qq.sendMsg(from_uin,self.qq.getDefaultContentStyle(result))
+        # clear the past result
+        self.commondProcess.clearPast()
