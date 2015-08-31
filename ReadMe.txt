@@ -2,7 +2,7 @@ running the python/src/web/exchange/webqqModule/webMain/__init__.py
 
 qq and password can change in __init__.py
 
-还存在的问题：
-1，输入命令之后要等待1秒才能返回，原因在使用POPEN的时候，使用回调进行发送消息，给1秒来装在回调内容，使用readline装载完成的时候会阻塞起来，无法知道何时装载完成
-2，针对不同QQ用户没有处理
-3，kill和terminate方法有问题
+The problems：
+1, Waiting for one second after entering the command, for the reason when using the POPEN, the readline will be blocked and can not know when the load is completed.
+2, According to different QQ users without processing
+3, The kill and the terminate method has a problem
